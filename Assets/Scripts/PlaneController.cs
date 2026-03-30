@@ -2,32 +2,24 @@ using UnityEngine;
 
 public class PlaneController : MonoBehaviour
 {
-    [Header("Liikumine")]
-    public float forwardSpeed = 30f;
-    public float rotationSpeed = 100f;
-    
-    [Header("Kiirendamine")]
-    public float boostSpeed = 50f;
-    public float normalSpeed = 30f;
+    [Header("Kiirus")]
+    public float baseSpeed = 25f;
+    public float boostSpeed = 45f;
     public float slowSpeed = 15f;
-    
     private float currentSpeed;
-    private Rigidbody rb;
+    
+    [Header("Pööramine")]
+    public float turnSpeed = 100f;
+    public float pitchSpeed = 100f;
     
     void Start()
     {
-        rb = GetComponent<Rigidbody>();
-        if (rb != null)
-        {
-            rb.useGravity = false;
-            rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
-        }
-        currentSpeed = forwardSpeed;
+        currentSpeed = baseSpeed;
     }
     
     void Update()
     {
-        // Kiirendamine (Shift) ja aeglustamine (Ctrl)
+        // === KIIRUSE MUUTMINE ===
         if (Input.GetKey(KeyCode.LeftShift))
         {
             currentSpeed = boostSpeed;
@@ -38,18 +30,18 @@ public class PlaneController : MonoBehaviour
         }
         else
         {
-            currentSpeed = normalSpeed;
+            currentSpeed = baseSpeed;
         }
         
-        // Edasi liikumine
-        transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime);
+        // === EDASILIIKUMINE (negatiivne X, et minna õiget pidi) ===
+        transform.Translate(Vector3.left * currentSpeed * Time.deltaTime);
         
-        // Pööramine (A/D või vasak/parem)
-        float horizontal = Input.GetAxis("Horizontal");
-        transform.Rotate(Vector3.up, horizontal * rotationSpeed * Time.deltaTime);
+        // === JUHTIMINE ===
+        float horizontal = Input.GetAxis("Horizontal");  // A/D või vasak/parem
+        float vertical = Input.GetAxis("Vertical");      // W/S või üles/alla
         
-        // Kallutamine (W/S või üles/alla)
-        float vertical = Input.GetAxis("Vertical");
-        transform.Rotate(Vector3.right, -vertical * rotationSpeed * Time.deltaTime);
+        // Pööramine
+        transform.Rotate(Vector3.forward, -vertical * turnSpeed * Time.deltaTime);
+        transform.Rotate(Vector3.up, horizontal * pitchSpeed * Time.deltaTime);
     }
 }
